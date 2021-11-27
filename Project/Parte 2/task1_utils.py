@@ -3,8 +3,7 @@ import numpy as np
 import json
 
 from sklearn.preprocessing import StandardScaler
-from sklearn.decomposition import PCA
-from sklearn.decomposition import TruncatedSVD
+from sklearn.decomposition import PCA, TruncatedSVD
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
 from my_utils import format_float
 # Fine imports
@@ -162,6 +161,5 @@ def get_top_k_latent_features(metrics_PCA, k):
             word_scores_ordered.insert(0, (word, score))
 
         latent_feature_data[latent_feature] = list(sorted(word_scores_ordered, key = lambda x: x[1], reverse=True))
-        ordered_data.insert(0, latent_feature_data)
-    ordered_data.reverse()
+        ordered_data.append(latent_feature_data)
     return ordered_data

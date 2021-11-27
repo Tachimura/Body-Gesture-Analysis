@@ -1,9 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from task1_utils import read_gesture_measures_reduced
-from task1_utils import metrics_reduced_2_numpy
-from task1_utils import metrics_numpy_2_PCA
+from task1_utils import read_gesture_measures_reduced, metrics_reduced_2_numpy, metrics_numpy_2_PCA
 # Fine imports
 
 #Genera il database sotto forma di matrice
@@ -15,9 +13,8 @@ def generate_alg_database(alg_metrics):
     for alg_metric in alg_metrics:
         riga += 1
         alg_database[riga] = alg_metrics_2_numpy_3d(alg_metric)
-        alg_gesture_files.insert(0, alg_metric['document'])
+        alg_gesture_files.append(alg_metric['document'])
     #
-    alg_gesture_files.reverse()
     database = {
         'gestures': alg_gesture_files,
         'np_database': alg_database

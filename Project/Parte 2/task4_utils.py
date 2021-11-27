@@ -13,9 +13,7 @@ def cluster_labels_2_pandas(cluster_labels, gestures):
             'Gesture': gesture,
             'Label': label
         }
-        point_cluster_labels.insert(0, data)
-    # manteniamo ordine del pandas df 
-    point_cluster_labels.reverse()
+        point_cluster_labels.append(data)
     return point_cluster_labels
 
 # Metodo che trasforma le top_p_gestures in un array numpy
@@ -301,8 +299,7 @@ def spectral_clustering_analyze(similarity_matrix, min_clusters=1, max_clusters=
             "clusters": n_clusters,
             "labels": clusters.tolist()
         }
-        results.insert(0, data)
-    results.reverse()
+        results.append(data)
     return results
 
 # Trasforma i risultati ottenuti dall'analisi in risultati pandas
@@ -330,11 +327,7 @@ def spectral_analisys_results_pandas_2_split(spectral_results):
                 data[(val, val_next)] = 1
     # Traduce the data dictionary into his 3 elems 
     for (source, target), value in data.items():
-        sources.insert(0, source)
-        targets.insert(0, target)
-        values.insert(0, value)
-    # Reverse to keep the time order
-    sources.reverse()
-    targets.reverse()
-    values.reverse()
+        sources.append(source)
+        targets.append(target)
+        values.append(value)
     return sources, targets, values

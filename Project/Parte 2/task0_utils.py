@@ -1,14 +1,13 @@
 # Per quantizzazione gaussiana
 from scipy import stats
 import scipy
-from numpy import random
 #
 import numpy as np
+from numpy import random
 import pandas as pd
 import json
 import math
-from my_utils import format_float
-from my_utils import quanticize_interval
+from my_utils import format_float, quanticize_interval, Alfabeto
 # Fine imports
 
 task0_stats = {
@@ -84,10 +83,9 @@ def associate_data_to_symbols(data_row, alfabeto, window_options):
         avgQ = window.mean()
         # Converto gli elementi nella finestra nella parola dell'alfabeto (WINQ)
         winQ = extract_word(window, alfabeto.simboli)
-        data_to_symbols.insert(0, (idx, (avgQ, winQ)))
+        data_to_symbols.append((idx, (avgQ, winQ)))
         # Sposto la posizione della finestra
         current_position += window_shift
-    data_to_symbols.reverse()
     return data_to_symbols
 
 # WRAPPER DA RICHIAMARE
@@ -149,7 +147,7 @@ def generate_alphabet(gesture_files, components, input_directory, options):
     for gesture_file_name in gesture_files:
         for component in components:
             document = input_directory + component + "/" + gesture_file_name
-            documents.insert(0, document)
+            documents.append(document)
     alfabeto = quanticize_interval(options) # Genero i simboli dell'alfabeto
     # Mi genero le parole prendendo solo quelle presenti nel dataset
     for document in documents:
@@ -159,6 +157,18 @@ def generate_alphabet(gesture_files, components, input_directory, options):
         # Estraggo le parole e le inserisco nell'alfabeto
         generate_alphabet_words(normalized_data, alfabeto, (options["window_size"], options["window_shift"]))
     return alfabeto
+
+def update_alphabet(alphabet1, alphabet2):
+    merge_alphabet = Alfabeto()
+    merge_alphabet.setSimboli(alphabet1.simboli)
+    # Metto tutte le parole del primo alfabeto
+    for parola in alphabet1.parole:
+        merge_alphabet.addParola(parola)
+    # Metto tutte le parole del secondo alfabeto
+    for parola in alphabet2.parole:
+        merge_alphabet.addParola(parola)
+    # parole in alfabeto è un set (una parola compare al massimo una volta)
+    return merge_alphabet
 
 # WRAPPER DA RICHIAMARE
 # Genera un dizionario con tuple  (Component_name, SensorID, winQ) ->  Contatore
@@ -348,7 +358,7 @@ def gesture_words_preprocessing(preprocessing_settings):
     for words_file in words_files:
         preprocess_unit = GestureWordsPreProcessing(words_file, alfabeto) # mi creo preprocess_unit x questo file
         gesture_metrics = words_2_metrics(dataset_preprocess_unit, path_words_directory + words_file, data_components, preprocess_unit, n_sensori, alfabeto)
-        gestures_metrics.insert(0, gesture_metrics)
+        gestures_metrics.append(gesture_metrics)
         # Salvo su file il dizionario completo
         write_metrics_as_json(gesture_metrics, words_file, path_vectors_directory)
 

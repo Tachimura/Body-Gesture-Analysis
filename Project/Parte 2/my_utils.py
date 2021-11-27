@@ -52,9 +52,8 @@ def quanticize_interval(options):
         # Gaussian Integral between current and next all divided by integral between -1 and 1 (to normalize result) and multiplied by 2
         result, _ = scipy.integrate.quad(gauss, min_val, next_val) # valore, errore stimato
         normalized_result = 2 * result / normalize_gauss
-        results.insert(0, (min_val, next_val, normalized_result))
+        results.append((min_val, next_val, normalized_result))
         cont = next_val
-    results.reverse()
     # A partire dalle lunghezze degli intervalli, mi costruisco il centro di questi facendo punto_iniziale_intervallo + lunghezza / 2
     # X evitare scritte enormi, taglio dopo la 3 cifra decimale
     alfabeto = Alfabeto()

@@ -17,8 +17,6 @@ def database_numpy_2_supervised_data(db_numpy, labels):
     y_train_df = dataset_pandas.loc[:, dataset_pandas.columns == 'Label']
     return X_train_df, y_train_df, reshaped_features_names
 
-# PROBABILMENTE SARà DA MODIFICARE, TEST_DATA CONTERRà IL PATH DEI DOCUMENTI
-# BISOGNERA GENERARE WORDS -> VECTORS -> TRASFORMAZIONE
 def prepare_test_dataframe(test_data, reshaped_features_names):
     # Preparo i dati di test trasformandoli in dataframe
     X_test_df = pd.DataFrame()

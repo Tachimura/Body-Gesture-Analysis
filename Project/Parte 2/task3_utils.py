@@ -57,7 +57,6 @@ def get_top_p_latent_gestures(latent_gestures, k):
         component_gesture_scores = [(gesture, score) for gesture, score in data.items()]
         ordered_component_gesture_scores = {}
         ordered_component_gesture_scores[component] = list(sorted(component_gesture_scores, key = lambda x: x[1], reverse=True))
-        ordered_data.insert(0, ordered_component_gesture_scores)
-
-    ordered_data.reverse()
+        ordered_data.append(ordered_component_gesture_scores)
+    #
     return ordered_data
