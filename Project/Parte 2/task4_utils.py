@@ -17,23 +17,14 @@ def cluster_labels_2_pandas(cluster_labels, gestures):
     return point_cluster_labels
 
 # Metodo che trasforma le top_p_gestures in un array numpy
-def top_p_gestures_2_numpy(gestures, columns):
-    # Mi prendo il numero di documenti (faccio così anche se so che sono 60)
-    _, (_, values) = next(enumerate(gestures[0].items()))
-    rows = len(values)
-    # Mi creo una matrice con tante righe (quanti sono le gesture) e tante colonne quante sono le semantiche latenti (inizializzo a 0)
-    numpy_top_p_gestures = np.zeros((rows, columns))
-    # Leggo tutti i dizionari nell'array dei dizionari
-    for column, gesture in zip(range(columns), gestures):
-        # Mi tiro fuori i valori da questi dizionari (array di coppie (gesto, valore))
-        _, (_, values) = next(enumerate(gesture.items()))
-        # Ciclo per ognuno di queste coppie
-        for row, value in values:
-            # Inserisco il valore nel gesto, nella posizione dell'attuale semantica latente (parte da 1 - 2... +importante a meno importante)
-            # -1 perchè i gesti partono da 1, qua lavoriamo ad indice che parte da 0
-            numpy_top_p_gestures[int(row) - 1][column] = value
-    # Ritorno in formato numpy
-    return numpy_top_p_gestures
+def top_p_gestures_2_numpy(gestures_data, columns, gestures_name):
+    _, (_, rows) = next(enumerate(gestures_data[0].items()))
+    gesture_2_numpy = np.zeros((len(rows), columns))
+    for column, top_p in zip(range(len(gestures_data)), gestures_data):
+        _, (_, row_data) = next(enumerate(top_p.items()))
+        for gesture, value in row_data:
+            gesture_2_numpy[gestures_name.index(gesture)][column] = value
+    return gesture_2_numpy
     
 ##################################################
 #################### TASK4  A ####################

@@ -10,13 +10,11 @@ from my_utils import format_float
 def generate_gestures_similarity_matrix(dataset_gesture, k_features_to_use):
     matrix = np.zeros((len(dataset_gesture), len(dataset_gesture)))
     for row, gesture_np in zip(range(0, len(dataset_gesture)), dataset_gesture):
-        ds_sensors_differences = dataset_gesture[:, :k_features_to_use, :] - gesture_np[:k_features_to_use, :]
-        ds_gesture_differences = np.abs(ds_sensors_differences).sum(axis=2)
+        ds_components_differences = dataset_gesture[:, :k_features_to_use] - gesture_np[:k_features_to_use]
         # - Posso normalizzare la distanza usando un certo peso
         #weights = np.array([1, 1, 1, ..])
         #ds_gesture_differences *= weights
-        # - Seconda somma per avere 1 valore per ogni gesto
-        ds_gesture_differences = ds_gesture_differences.sum(axis=1)
+        ds_gesture_differences = np.abs(ds_components_differences).sum(axis=1)
         normalized_gesture_differences = ds_gesture_differences / ds_gesture_differences.max()
         ds_similarities = 1 - normalized_gesture_differences
         for column, similarity in zip(range(row, len(ds_similarities)), ds_similarities[row:]):
