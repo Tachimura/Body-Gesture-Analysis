@@ -11,8 +11,8 @@ from my_utils import format_float, quanticize_interval, Alfabeto
 # Fine imports
 
 task0_stats = {
-    "window_size" : 2,      # Dimensione finestra
-    "window_shift" : 20,    # Dimensione shift della finestra
+    "window_size" : 5,      # Dimensione finestra
+    "window_shift" : 3,    # Dimensione shift della finestra
     "r": 2,                 # Risoluzione (2*R = # tagli nell'intervallo)
     "interval_min": -1,     # Valore minimo dell'intervallo normalizzato
     "interval_max": +1      # Valore massimo dell'intervallo normalizzato
@@ -42,6 +42,8 @@ def extract_symbol(element, symbols):
         if element >= min_value and element <= max_value:
             element_symbol = symbol
             break
+    if element_symbol == 0:
+        print("Elemento non in bucket:", element)
     return str(element_symbol)
 
 ##########################
@@ -90,20 +92,20 @@ def associate_data_to_symbols(data_row, alfabeto, window_options):
 
 # WRAPPER DA RICHIAMARE
 # Permette di prendere le parole di un file di gesti (.csv) e ritorna il dict che lo rappresenta
-def gesture_2_word(gesture_file_name, components, alfabeto, input_directory):
+def gesture_2_word(gesture_file_name, components, alfabeto, input_directory, options):
     # Leggo i file
     gesture_dict = {}
     for component in components:
         gesture_df = pd.read_csv(input_directory + component + "/" + gesture_file_name, header=None)
         stds = gesture_df.std(axis=1) # Calcolo std di tutte le righe
         means = gesture_df.mean(axis=1) # Calcolo mean di tutte le righe
-        normalized_df = normalize_data(gesture_df, task0_stats["interval_min"], task0_stats["interval_max"])
+        normalized_df = normalize_data(gesture_df, options["interval_min"], options["interval_max"])
         gesture_dict[str(component)] = {}
         for sensor in range(0, len(gesture_df.index)):
             gesture_dict[str(component)][str(sensor)] = {}
             gesture_dict[str(component)][str(sensor)]["mean"] = format_float(means.iloc[sensor])
             gesture_dict[str(component)][str(sensor)]["std"] = format_float(stds.iloc[sensor])
-            sensor_infos = associate_data_to_symbols(normalized_df.iloc[sensor].to_numpy(), alfabeto, (task0_stats["window_size"], task0_stats["window_shift"]))
+            sensor_infos = associate_data_to_symbols(normalized_df.iloc[sensor].to_numpy(), alfabeto, (options["window_size"], options["window_shift"]))
             for (finestra, (avgQ, winQ)) in sensor_infos:
                 gesture_dict[str(component)][str(sensor)]["w_"+str(finestra)] = (format_float(avgQ), winQ)
     return gesture_dict
@@ -157,18 +159,6 @@ def generate_alphabet(gesture_files, components, input_directory, options):
         # Estraggo le parole e le inserisco nell'alfabeto
         generate_alphabet_words(normalized_data, alfabeto, (options["window_size"], options["window_shift"]))
     return alfabeto
-
-def update_alphabet(alphabet1, alphabet2):
-    merge_alphabet = Alfabeto()
-    merge_alphabet.setSimboli(alphabet1.simboli)
-    # Metto tutte le parole del primo alfabeto
-    for parola in alphabet1.parole:
-        merge_alphabet.addParola(parola)
-    # Metto tutte le parole del secondo alfabeto
-    for parola in alphabet2.parole:
-        merge_alphabet.addParola(parola)
-    # parole in alfabeto è un set (una parola compare al massimo una volta)
-    return merge_alphabet
 
 # WRAPPER DA RICHIAMARE
 # Genera un dizionario con tuple  (Component_name, SensorID, winQ) ->  Contatore

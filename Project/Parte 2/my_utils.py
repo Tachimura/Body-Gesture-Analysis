@@ -12,7 +12,7 @@ interval_utils_stats = {
 }
 
 # Formatta il numero mettendo al massimo n_floats numeri dopo la virgola
-def format_float(number, n_floats=4):
+def format_float(number, n_floats=5):
     format_query = "{:0."+str(n_floats)+"f}"
     return float(format_query.format(number))
 
@@ -59,17 +59,25 @@ def quanticize_interval(options):
     alfabeto = Alfabeto()
     simboli_alfabeto = {} # Conterrà l'alfabeto dei simboli (simboli = centro degli intervalli gaussiani)
     current = 0
+    lim = len(results)
+    cont = 1
     for min_r, max_r, length_r in results:
         min_r = format_float(min_r)
         max_r = format_float(max_r)
         length_r = format_float(length_r)
-        middle = current + length_r / 2
-        middle = format_float(middle)
-        simboli_alfabeto[str(middle)] = (current, current + length_r)
-        # Dato che ho calcolato solo i valori x i numeri positivi (quelli negativi sono uguali ma con il -)
-        # Copio il centro appena trovato ma con le coordinate opposte
-        simboli_alfabeto[str(-middle)] = (float(-current), -(current + length_r))
+        middle = format_float(current + length_r / 2)
+        if cont == lim: # se sono al limite forzo il valore x evitare problemi
+            simboli_alfabeto[str(middle)] = (format_float(current), format_float(options["interval_max"]))
+            # Dato che ho calcolato solo i valori x i numeri positivi (quelli negativi sono uguali ma con il -)
+            # Copio il centro appena trovato ma con le coordinate opposte
+            simboli_alfabeto[str(-middle)] = (format_float(-current), format_float(options["interval_min"]))
+        else:
+            simboli_alfabeto[str(middle)] = (format_float(current), format_float(current + length_r))
+            # Dato che ho calcolato solo i valori x i numeri positivi (quelli negativi sono uguali ma con il -)
+            # Copio il centro appena trovato ma con le coordinate opposte
+            simboli_alfabeto[str(-middle)] = (format_float(-current), format_float(-(current + length_r)))
         current += length_r
+        cont += 1
     alfabeto.setSimboli(simboli_alfabeto)
     return alfabeto
 

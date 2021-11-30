@@ -4,13 +4,41 @@ import pandas as pd
 from sklearn.decomposition import TruncatedSVD
 
 from task1_utils import get_alg_features_score
+from task2_utils import dtw_matrix
 from my_utils import format_float
 # Fine imports
 
-def generate_gestures_similarity_matrix(dataset_gesture, k_features_to_use):
+
+def generate_gestures_similarity_matrix_dp(dataset_gesture):
     matrix = np.zeros((len(dataset_gesture), len(dataset_gesture)))
-    for row, gesture_np in zip(range(0, len(dataset_gesture)), dataset_gesture):
+    for row, gesture_np in zip(range(len(dataset_gesture)), dataset_gesture):
+        ds_gesture_differences = np.dot(dataset_gesture, gesture_np)  / (np.linalg.norm(dataset_gesture) * np.linalg.norm(gesture_np))
+        # Normalizzo
+        ds_gesture_differences = np.abs(ds_gesture_differences)
+        normalized_gesture_differences = ds_gesture_differences / ds_gesture_differences.max()
+        ds_similarities = normalized_gesture_differences
+        for column, similarity in zip(range(row, len(ds_similarities)), ds_similarities[row:]):
+            matrix[row][column] = similarity
+            matrix[column][row] = similarity
+    return matrix
+
+def generate_gestures_similarity_matrix_tksem(dataset_gesture, k_features_to_use):
+    matrix = np.zeros((len(dataset_gesture), len(dataset_gesture)))
+    for row, gesture_np in zip(range(len(dataset_gesture)), dataset_gesture):
         ds_components_differences = dataset_gesture[:, :k_features_to_use] - gesture_np[:k_features_to_use]
+        # Normalizzo
+        ds_gesture_differences = np.abs(ds_components_differences).sum(axis=1)
+        normalized_gesture_differences = ds_gesture_differences / ds_gesture_differences.max()
+        ds_similarities = 1 - normalized_gesture_differences
+        for column, similarity in zip(range(row, len(ds_similarities)), ds_similarities[row:]):
+            matrix[row][column] = similarity
+            matrix[column][row] = similarity
+    return matrix
+
+def generate_gestures_similarity_matrix_ed(dataset_gesture):
+    matrix = np.zeros((len(dataset_gesture), len(dataset_gesture)))
+    for row, gesture_np in zip(range(len(dataset_gesture)), dataset_gesture):
+        ds_components_differences = dataset_gesture - gesture_np
         # - Posso normalizzare la distanza usando un certo peso
         #weights = np.array([1, 1, 1, ..])
         #ds_gesture_differences *= weights
@@ -21,6 +49,21 @@ def generate_gestures_similarity_matrix(dataset_gesture, k_features_to_use):
             matrix[row][column] = similarity
             matrix[column][row] = similarity
     return matrix
+
+def generate_gestures_similarity_matrix_dtw(dataset_gesture):
+    matrix = np.zeros((len(dataset_gesture), len(dataset_gesture)))
+    for row, gesture_np in zip(range(len(dataset_gesture)), dataset_gesture):
+        ds_gesture_differences = dtw_matrix(dataset_gesture, gesture_np)
+        # Normalizzo
+        ds_gesture_differences = np.abs(ds_gesture_differences)
+        normalized_gesture_differences = ds_gesture_differences / ds_gesture_differences.max()
+        ds_similarities = 1 - normalized_gesture_differences
+        for column, similarity in zip(range(row, len(ds_similarities)), ds_similarities[row:]):
+            matrix[row][column] = similarity
+            matrix[column][row] = similarity
+    return matrix
+
+##
 
 def gestures_similarity_matrix_2_pandas(similarity_matrix, gestures_names):
     return pd.DataFrame(data=similarity_matrix, index=gestures_names, columns=gestures_names)
