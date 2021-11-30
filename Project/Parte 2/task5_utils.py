@@ -28,14 +28,14 @@ def database_numpy_2_supervised_data(db_numpy, labels):
     return (X_train, y_train), (X_test, y_test), features_names
 
 # Esegue una ricerca completa e restituisce i valori di accuracy + neighbors in formato pandas
-def test_knn_best_K(X_train, y_train, X_test, y_test, max_neighbors=1):
+def test_knn_best_K(X_train, y_train, X_test, y_test, max_neighbors=1, weights='uniform'):
     accuracy_data = {
         'neighbors': [],
         'data': []
     }
     # Ciclo per ogni valore di neighbors e vedo come va
     for n_neighbors in range(1, max_neighbors):
-        classifier = KNeighborsClassifier(n_neighbors=n_neighbors)
+        classifier = KNeighborsClassifier(n_neighbors=n_neighbors, weights=weights)
         classifier.fit(X_train, y_train)
         y_pred = classifier.predict(X_test)
         accuracy_data['neighbors'].append(n_neighbors)
