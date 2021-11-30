@@ -181,7 +181,7 @@ class MyPartitioner:
                     if group_index != None:
                         break
             # Aggiungo la predizione al punto (None se il punto non è presente in alcun gruppo)
-            groups_predicted.append((data_point, group_index))
+            groups_predicted.append(group_index)
         # Ritorno la lista di predizioni in formato [(punto, gruppo), ...]
         return groups_predicted
 
