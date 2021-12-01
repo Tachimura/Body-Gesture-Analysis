@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import json
-from my_utils import format_float
+from my_utils import format_float, matrix_vector_euclidean_distance
 from task1_utils import read_gesture_measures_reduced, metrics_reduced_2_numpy, metrics_numpy_2_PCA
 # Fine imports
     
@@ -21,8 +21,13 @@ def find_k_most_similar_dp(alg_database, gesture_np, query_settings):
 def find_k_most_similar_tksem(alg_database, gesture_np, query_settings):
     k_features_to_use = query_settings['k_latent_features'] # Quante features latenti usare
     k_top_gestures_to_return = query_settings['k_gestures_return'] # Quante gestures tornare come risultato
-    # Differenza data come la sottrazione
-    ds_gestures_differences = alg_database['data'][:, :k_features_to_use] - gesture_np[:k_features_to_use]
+    #NEW
+    euclidean_distance = matrix_vector_euclidean_distance(alg_database['data'][:, :k_features_to_use], gesture_np[:k_features_to_use])
+    ds_gestures_differences = np.zeros((len(euclidean_distance), 2))
+    for row, elem in enumerate(euclidean_distance):
+        ds_gestures_differences[row][0] = elem
+    #OLD
+    #ds_gestures_differences =  alg_database['data'][:, :k_features_to_use] - gesture_np[:k_features_to_use]
     # Ritorno in modo ordinato
     return sorted_gestures_2_pandas(generate_ordered_similarity(ds_gestures_differences, alg_database['gestures'])[:k_top_gestures_to_return])
 #

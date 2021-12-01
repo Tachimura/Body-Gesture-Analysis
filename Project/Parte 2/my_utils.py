@@ -4,12 +4,17 @@ import glob
 from scipy import stats
 import scipy
 from numpy import random
+from numpy.linalg import norm
 # Fine imports
 
 interval_utils_stats = {
     "mu": 0,
     "sigma": 0.25
 }
+
+# Metodo che calcola la distanza euclidea fra ogni riga di una matrice ed un vettore
+def matrix_vector_euclidean_distance(matrix, vector):
+    return norm(matrix - vector, axis=1, ord=2)
 
 # Formatta il numero mettendo al massimo n_floats numeri dopo la virgola
 def format_float(number, n_floats=5):
@@ -41,24 +46,24 @@ def gauss(x):
 # r indica il numero di simboli
 def quanticize_interval(options):
     dim = (options["interval_max"] - options["interval_min"]) / (2 * float(options["r"])) # 2 è la dimensione -1 -> +1, ma devo dividere per 2r, quindi rimane 1/r
-    cont = 0 # options["min"] #Ottimizzazione, i risultati a dx o a sx sono uguali, conto solo quelli a dx e creo gli intervalli anche x quelli a sx
     guassian = random.normal(loc=interval_utils_stats["mu"], scale=interval_utils_stats["sigma"])
     results = [] # Simboli
     normalize_gauss, _ = scipy.integrate.quad(gauss, options["interval_min"], options["interval_max"]) #valore, errore stimato
+    min_val = interval_utils_stats["mu"] # parto dal punto centrale da cui eseguo il conto
     # Mi calcolo la lunghezza degli intervalli gaussiani usando le 2*r suddivisioni dell'intervallo base
-    while cont < options["interval_max"]:
-        min_val = cont
-        next_val = cont + dim
+    # Ottimizzazione, a sx sarà uguale che a dx, (ma invertito di segno) faccio solo verso destra
+    for _ in range(options['r']):
+        next_val = min_val + dim
         # Gaussian Integral between current and next all divided by integral between -1 and 1 (to normalize result) and multiplied by 2
         result, _ = scipy.integrate.quad(gauss, min_val, next_val) # valore, errore stimato
         normalized_result = 2 * result / normalize_gauss
         results.append((min_val, next_val, normalized_result))
-        cont = next_val
+        min_val = next_val
     # A partire dalle lunghezze degli intervalli, mi costruisco il centro di questi facendo punto_iniziale_intervallo + lunghezza / 2
     # X evitare scritte enormi, taglio dopo la 3 cifra decimale
     alfabeto = Alfabeto()
     simboli_alfabeto = {} # Conterrà l'alfabeto dei simboli (simboli = centro degli intervalli gaussiani)
-    current = 0
+    current = interval_utils_stats["mu"] # parto dal punto centrale da cui eseguo il conto
     lim = len(results)
     cont = 1
     for min_r, max_r, length_r in results:

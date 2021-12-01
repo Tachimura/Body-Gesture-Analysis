@@ -5,7 +5,7 @@ from sklearn.decomposition import TruncatedSVD
 
 from task1_utils import get_alg_features_score
 from task2_utils import dtw_matrix
-from my_utils import format_float
+from my_utils import format_float, matrix_vector_euclidean_distance
 # Fine imports
 
 
@@ -25,9 +25,12 @@ def generate_gestures_similarity_matrix_dp(dataset_gesture):
 def generate_gestures_similarity_matrix_tksem(dataset_gesture, k_features_to_use):
     matrix = np.zeros((len(dataset_gesture), len(dataset_gesture)))
     for row, gesture_np in zip(range(len(dataset_gesture)), dataset_gesture):
-        ds_components_differences = dataset_gesture[:, :k_features_to_use] - gesture_np[:k_features_to_use]
+        #NEW
+        ds_components_differences = matrix_vector_euclidean_distance(dataset_gesture[:, :k_features_to_use], gesture_np[:k_features_to_use])
+        #OLD
+        #ds_components_differences = dataset_gesture[:, :k_features_to_use] - gesture_np[:k_features_to_use]
         # Normalizzo
-        ds_gesture_differences = np.abs(ds_components_differences).sum(axis=1)
+        ds_gesture_differences = np.abs(ds_components_differences)
         normalized_gesture_differences = ds_gesture_differences / ds_gesture_differences.max()
         ds_similarities = 1 - normalized_gesture_differences
         for column, similarity in zip(range(row, len(ds_similarities)), ds_similarities[row:]):
