@@ -100,7 +100,7 @@ def preprocessing_subtask_idfs(database_pp_unit, prep_unit, alfabeto):
     for word in alfabeto.parole:
         # 'aggiungiamo' due documenti: uno non contiene nessuna parola e l'altro le contiene tutte
         # Questo permette di evitare divisioni per 0 (se nessun sensore ha una parola) e x avere risultati + smooth (con correzione di laplace)
-        prep_unit.idfs[word] = float("{:0.3f}".format(math.log((database_pp_unit.n_documents + 2) / (len(database_pp_unit.words_4_document[word]) + 1)))) 
+        prep_unit.idfs[word] = float("{:0.5f}".format(math.log((database_pp_unit.n_documents + 2) / (len(database_pp_unit.words_4_document[word]) + 1)))) 
 
 # Il gesto è il dataset, i sensori sono i documenti
 # Calcolo idfs2 come numero di sensori (documenti) / numero di sensori (documenti) che hanno almeno una occorrenza della parola
@@ -108,4 +108,4 @@ def preprocessing_subtask_idfs2(prep_unit, alfabeto):
     for word in alfabeto.parole:
         # 'aggiungiamo' due sensori: uno non contiene nessuna parola e l'altro le contiene tutte
         # Questo permette di evitare divisioni per 0 (se nessun sensore ha una parola) e x avere risultati + smooth (con correzione di laplace)
-        prep_unit.idfs2[word] = float("{:0.3f}".format(math.log((prep_unit.n_sensors + 2) / (len(prep_unit.words_4_sensors[word]) + 1)))) 
+        prep_unit.idfs2[word] = float("{:0.5f}".format(math.log((prep_unit.n_sensors + 2) / (len(prep_unit.words_4_sensors[word]) + 1)))) 

@@ -20,36 +20,44 @@ def gauss(x):
 # r indica il numero di simboli
 def quanticize_interval(options):
     dim = (options["max"] - options["min"]) / (2 * float(options["r"])) # 2 è la dimensione -1 -> +1, ma devo dividere per 2r, quindi rimane 1/r
-    cont = 0 # options["min"] #Ottimizzazione, i risultati a dx o a sx sono uguali, conto solo quelli a dx e creo gli intervalli anche x quelli a sx
     guassian = random.normal(loc=options["mu"], scale=options["sigma"])
     results = [] # Simboli
     normalize_gauss, _ = scipy.integrate.quad(gauss, options["min"], options["max"]) #valore, errore stimato
+    min_val = interval_utils_stats["mu"] # parto dal punto centrale da cui eseguo il conto
     # Mi calcolo la lunghezza degli intervalli gaussiani usando le 2*r suddivisioni dell'intervallo base
-    while cont < options["max"]:
-        min_val = cont
-        next_val = cont + dim
+    # Ottimizzazione, a sx sarà uguale che a dx, (ma invertito di segno) faccio solo verso destra
+    for _ in range(options['r']):
+        next_val = min_val + dim
         # Gaussian Integral between current and next all divided by integral between -1 and 1 (to normalize result) and multiplied by 2
         result, _ = scipy.integrate.quad(gauss, min_val, next_val) # valore, errore stimato
         normalized_result = 2 * result / normalize_gauss
-        results.insert(0, (min_val, next_val, normalized_result))
-        cont = next_val
-    results.reverse()
+        results.append((min_val, next_val, normalized_result))
+        min_val = next_val
     # A partire dalle lunghezze degli intervalli, mi costruisco il centro di questi facendo punto_iniziale_intervallo + lunghezza / 2
     # X evitare scritte enormi, taglio dopo la 3 cifra decimale
     alfabeto = Alfabeto()
     simboli_alfabeto = {} # Conterrà l'alfabeto dei simboli (simboli = centro degli intervalli gaussiani)
-    current = 0
+    current = interval_utils_stats["mu"] # parto dal punto centrale da cui eseguo il conto
+    lim = len(results)
+    cont = 1
     for min_r, max_r, length_r in results:
-        min_r = float("{:0.3f}".format(min_r))
-        max_r = float("{:0.3f}".format(max_r))
-        length_r = float("{:0.3f}".format(length_r))
+        min_r = float("{:0.5f}".format(min_r))
+        max_r = float("{:0.5f}".format(max_r))
+        length_r = float("{:0.5f}".format(length_r))
         middle = current + length_r / 2
-        middle = float("{:0.3f}".format(middle))
-        simboli_alfabeto[str(middle)] = (current, current + length_r)
-        # Dato che ho calcolato solo i valori x i numeri positivi (quelli negativi sono uguali ma con il -)
-        # Copio il centro appena trovato ma con le coordinate opposte
-        simboli_alfabeto[str(-middle)] = (float(-current), -(current + length_r))
+        middle = float("{:0.5f}".format(middle))
+        if cont == lim: # se sono al limite forzo il valore x evitare problemi
+            simboli_alfabeto[str(middle)] = (current, options["max"])
+            # Dato che ho calcolato solo i valori x i numeri positivi (quelli negativi sono uguali ma con il -)
+            # Copio il centro appena trovato ma con le coordinate opposte
+            simboli_alfabeto[str(-middle)] = (float(-current), options["min"])
+        else:
+            simboli_alfabeto[str(middle)] = (current, current + length_r)
+            # Dato che ho calcolato solo i valori x i numeri positivi (quelli negativi sono uguali ma con il -)
+            # Copio il centro appena trovato ma con le coordinate opposte
+            simboli_alfabeto[str(-middle)] = (float(-current), -(current + length_r))
         current += length_r
+        cont += 1
     alfabeto.setSimboli(simboli_alfabeto)
     return alfabeto
 

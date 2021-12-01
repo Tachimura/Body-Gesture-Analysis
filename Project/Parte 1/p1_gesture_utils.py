@@ -210,10 +210,10 @@ def get_words_frequencies(word_file_path, preprocess_unit, alfabeto):
     # Calcolo TF per ogni parola definito:  frequenza parola nel documento / # parole nel documento
     for key, s_values in document_data.words_frequency.items():
         for sensor, value in s_values.items():
-            document_data.updateTF(key, sensor, float("{:0.3f}".format(value / document_data.getWordsInSensor(sensor))))
+            document_data.updateTF(key, sensor, float("{:0.5f}".format(value / document_data.getWordsInSensor(sensor))))
             # Dentro preprocess_unit ci sono presenti già gli idf, quindi prendo da li
-            document_data.updateTFIDF(key, sensor, float("{:0.3f}".format(document_data.getTF(key, sensor) * preprocess_unit.idfs[word])))
-            document_data.updateTFIDF2(key, sensor, float("{:0.3f}".format(document_data.getTF(key, sensor) * preprocess_unit.idfs2[word])))
+            document_data.updateTFIDF(key, sensor, float("{:0.5f}".format(document_data.getTF(key, sensor) * preprocess_unit.idfs[word])))
+            document_data.updateTFIDF2(key, sensor, float("{:0.5f}".format(document_data.getTF(key, sensor) * preprocess_unit.idfs2[word])))
 
     return document_data
 
