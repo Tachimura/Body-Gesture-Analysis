@@ -3,8 +3,7 @@ import numpy as np
 import json
 
 from sklearn.preprocessing import StandardScaler
-from sklearn.decomposition import PCA, TruncatedSVD
-from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
+from sklearn.decomposition import PCA, TruncatedSVD, LatentDirichletAllocation
 from my_utils import format_float
 # Fine imports
 
@@ -94,7 +93,12 @@ def save_alg(alg, fitted_alg, features_score_df, show_intermediate_data=False):
     # Fine show risultati
 
     # np.cumsum mostra la varianza totale rappresentata dalle varie componenti (mostra quante ne bastano per 100% o meno), possiamo poi plottarlo
-    return gesture_features_score_result, np.cumsum(alg.explained_variance_ratio_)
+    if hasattr(alg, 'explained_variance_ratio_'):
+        return gesture_features_score_result, np.cumsum(alg.explained_variance_ratio_)
+    else: # lda ha questo (ma non è explained variance giustamente) (Exponential value of expectation of log topic word distribution), ma valori sono bassi e non printiamo
+        return gesture_features_score_result, np.cumsum(np.sum(np.transpose(alg.exp_dirichlet_component_), axis=0))
+        #return gesture_features_score_result, None
+        
 
 # ---------------- PCA ----------------
 # Dato i dati in versione pandas, ed il nome del gesto (nome documento), esegue il PRINCIPAL COMPONENT ANALYSIS
@@ -118,10 +122,10 @@ def metrics_numpy_2_SVD(metrics_df, show_intermediate_data=False):
 # ---------------- LDA ----------------
 # Dato i dati in versione pandas, ed il nome del gesto (nome documento), esegue il LINEAR DISCRIMINANT ANALYSIS
 # Ritorna per ogni componente latente, lo score di ogni feature. (con show_intermediate_data=True ritorna come secondo parametro pure un plot)
-def metrics_numpy_2_LDA(metrics_df, labels, show_intermediate_data=False):
+def metrics_numpy_2_LDA(metrics_df, show_intermediate_data=False):
     #Fitting the LDA class
-    lda = LDA(n_components = len(set(labels)) - 1) # n components non deve essere maggiore tra min(n.data, n_classes-1)
-    fitted_lda = lda.fit_transform(metrics_df.to_numpy(), y=labels)
+    lda = LatentDirichletAllocation(n_components = len(metrics_df.index), random_state=0) # n components non deve essere maggiore tra min(n.data, n_classes-1)
+    fitted_lda = lda.fit_transform(metrics_df.to_numpy())
     features_score_df = get_alg_features_score(lda, metrics_df.columns)
     return save_alg(lda, fitted_lda, features_score_df,  show_intermediate_data=show_intermediate_data)
 # -------------------------------------
